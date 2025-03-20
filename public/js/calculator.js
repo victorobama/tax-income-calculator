@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        fetch("/api/calculate-tax", {
+        fetch("/api/v1/taxes/calculate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
