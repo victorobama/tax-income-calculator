@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: tax_calculator_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: tax_calculator
+      MYSQL_USER: taxuser
+      MYSQL_PASSWORD: taxpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql
+    networks:
+      - tax_network
+
+  # PHP-FPM Service
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: tax_calculator_php
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - tax_network
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:latest
+    container_name: tax_calculator_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - tax_network
+
+networks:
+  tax_network:
+    driver: bridge
+
+volumes:
+  db_data:
